@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -49,15 +48,5 @@ public class AuthServiceImpl implements IAuthService {
         Customer savedCustomer = customerRepository.save(customer);
 
         return savedCustomer.toResponse();
-    }
-
-
-    public List<RegisterCustomerResponse> getUsers() {
-        return this.customerRepository.findAll().stream().map(Customer::toResponse).toList();
-    }
-
-    @Override
-    public boolean existsByEmail(String email) {
-        return this.customerRepository.existsByEmail(email);
     }
 }
