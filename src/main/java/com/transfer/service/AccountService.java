@@ -2,10 +2,17 @@ package com.transfer.service;
 
 
 import com.transfer.dto.AccountDTO;
+import com.transfer.dto.CreateAccountDTO;
 import com.transfer.dto.UpdateAccountDTO;
+import com.transfer.entity.Account;
+import com.transfer.entity.Customer;
+import com.transfer.exception.custom.ResourceNotFoundException;
 import com.transfer.repository.AccountRepository;
+import com.transfer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.security.SecureRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -13,14 +20,33 @@ public class AccountService implements IAccountService {
 
     private final AccountRepository accountRepository;
 
+    private final CustomerRepository customerRepository;
+
     @Override
-    public AccountDTO createAccount(Long customerId, AccountDTO accountDTO) {
-        return null;
+    public AccountDTO createAccount(CreateAccountDTO accountDTO) throws ResourceNotFoundException {
+
+        Customer customer = this.customerRepository.findById(accountDTO.getCustomerId()).orElseThrow(()
+                -> new ResourceNotFoundException("Customer with id " + accountDTO.getCustomerId() + " not found"));
+
+        Account account = Account.builder()
+                .accountNumber(new SecureRandom().nextInt(1000000000) + "")
+                .accountType(accountDTO.getAccountType())
+                .accountName(accountDTO.getAccountName())
+                .accountDescription(accountDTO.getAccountDescription())
+                .currency(accountDTO.getCurrency())
+                .balance(0.0)
+                .customer(customer)
+                .build();
+
+        Account savedAccount = this.accountRepository.save(account);
+
+        return savedAccount.toDTO();
     }
 
     @Override
-    public AccountDTO getAccountById(Long accountId) {
-        return null;
+    public AccountDTO getAccountById(Long accountId) throws ResourceNotFoundException {
+        return this.accountRepository.findById(accountId).orElseThrow(()
+                -> new ResourceNotFoundException("Account not found")).toDTO();
     }
 
     @Override
