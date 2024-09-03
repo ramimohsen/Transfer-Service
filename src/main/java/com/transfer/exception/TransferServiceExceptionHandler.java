@@ -9,6 +9,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -87,10 +88,10 @@ public class TransferServiceExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-//    @ExceptionHandler(AuthenticationException.class)
-//    public ResponseEntity<Object> authenticationExceptionHandling(AuthenticationException exception, WebRequest request) {
-//        return new ResponseEntity<>(new ErrorDetails(LocalDateTime.now()
-//                , String.format("Incorrect email or password credentials provided. [ %s ]", exception.getMessage()),
-//                request.getDescription(false), HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
-//    }
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> authenticationExceptionHandling(AuthenticationException exception, WebRequest request) {
+        return new ResponseEntity<>(new ErrorDetails(LocalDateTime.now()
+                , String.format("Incorrect email or password credentials provided. [ %s ]", exception.getMessage()),
+                request.getDescription(false), HttpStatus.UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+    }
 }

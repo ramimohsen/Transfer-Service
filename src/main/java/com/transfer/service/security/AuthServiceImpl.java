@@ -1,5 +1,7 @@
-package com.transfer.service;
+package com.transfer.service.security;
 
+import com.transfer.dto.LoginRequestDTO;
+import com.transfer.dto.LoginResponseDTO;
 import com.transfer.dto.RegisterCustomerRequest;
 import com.transfer.dto.RegisterCustomerResponse;
 import com.transfer.dto.enums.AccountCurrency;
@@ -9,6 +11,12 @@ import com.transfer.entity.Customer;
 import com.transfer.exception.custom.CustomerAlreadyExistException;
 import com.transfer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +28,13 @@ public class AuthServiceImpl implements IAuthService {
 
     private final CustomerRepository customerRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
+    private final AuthenticationManager authenticationManager;
+
+    private final JwtUtils jwtUtils;
+
+
     @Transactional
     public RegisterCustomerResponse register(RegisterCustomerRequest customerRequest) throws CustomerAlreadyExistException {
 
@@ -29,7 +44,7 @@ public class AuthServiceImpl implements IAuthService {
 
         Customer customer = Customer.builder()
                 .email(customerRequest.getEmail())
-                .password(customerRequest.getPassword())
+                .password(this.passwordEncoder.encode(customerRequest.getPassword()))
                 .name(customerRequest.getName())
                 .build();
 
@@ -48,5 +63,23 @@ public class AuthServiceImpl implements IAuthService {
         Customer savedCustomer = customerRepository.save(customer);
 
         return savedCustomer.toResponse();
+    }
+
+    @Override
+    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        return LoginResponseDTO.builder()
+                .token(jwt)
+                .message("Login Successful")
+                .status(HttpStatus.ACCEPTED)
+                .tokenType("Bearer")
+                .build();
     }
 }

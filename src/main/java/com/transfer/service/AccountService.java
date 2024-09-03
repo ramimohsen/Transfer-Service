@@ -11,6 +11,7 @@ import com.transfer.repository.AccountRepository;
 import com.transfer.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 
@@ -23,6 +24,7 @@ public class AccountService implements IAccountService {
     private final CustomerRepository customerRepository;
 
     @Override
+    @Transactional
     public AccountDTO createAccount(CreateAccountDTO accountDTO) throws ResourceNotFoundException {
 
         Customer customer = this.customerRepository.findById(accountDTO.getCustomerId()).orElseThrow(()

@@ -1,10 +1,12 @@
 package com.transfer.controller;
 
+import com.transfer.dto.LoginRequestDTO;
+import com.transfer.dto.LoginResponseDTO;
 import com.transfer.dto.RegisterCustomerRequest;
 import com.transfer.dto.RegisterCustomerResponse;
 import com.transfer.exception.custom.CustomerAlreadyExistException;
 import com.transfer.exception.response.ErrorDetails;
-import com.transfer.service.IAuthService;
+import com.transfer.service.security.IAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -33,6 +35,14 @@ public class AuthController {
     @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema(implementation = ErrorDetails.class), mediaType = "application/json")})
     public RegisterCustomerResponse register(@RequestBody @Valid RegisterCustomerRequest customer) throws CustomerAlreadyExistException {
         return this.authService.register(customer);
+    }
+
+    @Operation(summary = "Login and generate JWT")
+    @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = LoginResponseDTO.class), mediaType = "application/json")})
+    @ApiResponse(responseCode = "401", content = {@Content(schema = @Schema(implementation = ErrorDetails.class), mediaType = "application/json")})
+    @PostMapping("/login")
+    public LoginResponseDTO login(@RequestBody @Valid LoginRequestDTO loginRequestDTO) {
+        return this.authService.login(loginRequestDTO);
     }
 
 }
